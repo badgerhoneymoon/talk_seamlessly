@@ -151,7 +151,7 @@ export default function TranslatorInterface() {
             </p>
           </div>
 
-          {/* Direction Toggle */}
+          {/* Direction Toggle */} 
           <div className="flex justify-center">
             <LanguageToggle 
               direction={direction} 
