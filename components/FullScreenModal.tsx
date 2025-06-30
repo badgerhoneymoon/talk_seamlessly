@@ -263,7 +263,7 @@ export default function FullScreenModal({
 
         {/* Instructions */}
         <div className="text-center mt-8 pb-6">
-          <p className="text-white/60 text-lg">
+          <p className="hidden sm:block text-white/60 text-lg">
             Press ESC or click × to close
           </p>
         </div>
