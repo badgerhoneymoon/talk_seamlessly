@@ -8,7 +8,8 @@ export type OpenAIVoice = 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimme
 interface Settings {
   ttsProvider: TTSProvider;
   openaiVoice: OpenAIVoice;
-  ttsSpeed: number;
+  englishTtsSpeed: number;
+  vietnameseTtsSpeed: number;
 }
 
 interface SettingsContextType {
@@ -21,7 +22,8 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 const DEFAULT_SETTINGS: Settings = {
   ttsProvider: 'openai',
   openaiVoice: 'shimmer',
-  ttsSpeed: 1.0,
+  englishTtsSpeed: 1.0,
+  vietnameseTtsSpeed: 1.0,
 };
 
 export function SettingsProvider({ children }: { children: ReactNode }) {

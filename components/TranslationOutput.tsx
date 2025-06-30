@@ -23,18 +23,24 @@ export default function TranslationOutput({
   onShowFullScreen
 }: TranslationOutputProps) {
   const [isCopiedTranslated, setIsCopiedTranslated] = useState(false);
+  const [isCopiedOriginal, setIsCopiedOriginal] = useState(false);
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [audioCache, setAudioCache] = useState<Record<string, string>>({});
   const { settings } = useSettings();
 
-  const copyToClipboard = async (text: string) => {
+  const copyToClipboard = async (text: string, isOriginal = false) => {
     if (!text) return;
     
     try {
       await navigator.clipboard.writeText(text);
-      setIsCopiedTranslated(true);
-      setTimeout(() => setIsCopiedTranslated(false), 2000);
+      if (isOriginal) {
+        setIsCopiedOriginal(true);
+        setTimeout(() => setIsCopiedOriginal(false), 2000);
+      } else {
+        setIsCopiedTranslated(true);
+        setTimeout(() => setIsCopiedTranslated(false), 2000);
+      }
     } catch (err) {
       console.error('Failed to copy text:', err);
     }
@@ -65,9 +71,10 @@ export default function TranslationOutput({
       // Use ElevenLabs for Vietnamese, OpenAI for English
       const isVietnamese = language === 'vi-VN';
       const apiEndpoint = isVietnamese ? '/api/elevenlabs-tts' : '/api/text-to-speech';
+      const speedToUse = isVietnamese ? settings.vietnameseTtsSpeed : settings.englishTtsSpeed;
       const cacheKey = isVietnamese 
-        ? `elevenlabs-${text}-${language}-${settings.ttsSpeed}`
-        : `${text}-${language}-${settings.openaiVoice}-${settings.ttsSpeed}`;
+        ? `elevenlabs-${text}-${language}-${speedToUse}`
+        : `${text}-${language}-${settings.openaiVoice}-${speedToUse}`;
       
       // Check if we have cached audio
       if (audioCache[cacheKey]) {
@@ -88,8 +95,8 @@ export default function TranslationOutput({
         setIsLoadingAudio(true);
         
         const requestBody = isVietnamese 
-          ? { text, speed: settings.ttsSpeed }
-          : { text, language, voice: settings.openaiVoice, speed: settings.ttsSpeed };
+          ? { text, speed: speedToUse }
+          : { text, language, voice: settings.openaiVoice, speed: speedToUse };
         
         console.log(`🌐 Sending to ${isVietnamese ? 'ElevenLabs' : 'OpenAI'} TTS API:`, requestBody);
         
@@ -145,7 +152,8 @@ export default function TranslationOutput({
     setIsPlayingAudio(true);
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = language;
-    utterance.rate = settings.ttsSpeed;
+    const speedToUse = language === 'vi-VN' ? settings.vietnameseTtsSpeed : settings.englishTtsSpeed;
+    utterance.rate = speedToUse;
     utterance.pitch = 1;
     
     utterance.onend = () => setIsPlayingAudio(false);
@@ -171,18 +179,65 @@ export default function TranslationOutput({
 
   return (
     <div className="space-y-4">
-      {/* Only show translated text */}
+      {/* Original text */}
+      {originalText && (
+        <div className="relative">
+          {/* Background glow effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-200 to-indigo-200 rounded-3xl blur-xl opacity-30 -z-10 transform scale-110" />
+          
+          <Card className="relative p-4 sm:p-6 bg-gradient-to-br from-blue-50/90 to-indigo-50/90 backdrop-blur-sm border border-blue-200/50 rounded-3xl shadow-xl">
+            <div className="space-y-3 sm:space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2 sm:space-x-3">
+                  <div className="w-2 h-2 sm:w-3 sm:h-3 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full animate-pulse" />
+                  <h3 className="text-base sm:text-lg font-bold text-gray-800">
+                    Original ({direction === 'en-to-vi' ? 'English' : 'Vietnamese'})
+                  </h3>
+                </div>
+                
+                <div className="flex space-x-1 sm:space-x-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyToClipboard(originalText, true)}
+                    className="p-2 sm:p-3 hover:bg-white/60 rounded-xl transition-all duration-200 hover:scale-110 active:scale-95"
+                    title="Copy original"
+                  >
+                    {isCopiedOriginal ? (
+                      <Check className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+                    ) : (
+                      <Copy className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+                    )}
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl p-3 sm:p-4 border border-white/50 shadow-inner">
+                <p className="text-sm sm:text-base text-gray-900 leading-relaxed font-medium">
+                  {originalText}
+                </p>
+                
+                {/* Subtle decorative elements */}
+                <div className="absolute top-2 right-2 w-2 h-2 bg-blue-300 rounded-full opacity-30" />
+                <div className="absolute bottom-2 left-2 w-1 h-1 bg-indigo-400 rounded-full opacity-40" />
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* Translated text */}
       {translatedText && (
         <div className="relative">
           {/* Background glow effect */}
           <div className="absolute inset-0 bg-gradient-to-r from-green-200 to-emerald-200 rounded-3xl blur-xl opacity-30 -z-10 transform scale-110" />
           
-          <Card className="relative p-4 sm:p-6 bg-gradient-to-br from-green-50/90 to-emerald-50/90 backdrop-blur-sm border border-green-200/50 rounded-3xl shadow-xl">
-            <div className="space-y-3 sm:space-y-4">
+          <Card className="relative p-6 sm:p-8 bg-gradient-to-br from-green-50/90 to-emerald-50/90 backdrop-blur-sm border border-green-200/50 rounded-3xl shadow-xl">
+            <div className="space-y-4 sm:space-y-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2 sm:space-x-3">
-                  <div className="w-2 h-2 sm:w-3 sm:h-3 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full animate-pulse" />
-                  <h3 className="text-base sm:text-lg font-bold text-gray-800">
+                  <div className="w-3 h-3 sm:w-4 sm:h-4 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full animate-pulse" />
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-800">
                     Translation ({targetLanguage})
                   </h3>
                 </div>
@@ -206,7 +261,7 @@ export default function TranslationOutput({
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => copyToClipboard(translatedText)}
+                    onClick={() => copyToClipboard(translatedText, false)}
                     className="p-2 sm:p-3 hover:bg-white/60 rounded-xl transition-all duration-200 hover:scale-110 active:scale-95"
                     title="Copy translation"
                   >
@@ -231,8 +286,8 @@ export default function TranslationOutput({
                 </div>
               </div>
               
-              <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-white/50 shadow-inner">
-                <p className="text-base sm:text-lg text-gray-900 leading-relaxed font-medium">
+              <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-white/50 shadow-inner">
+                <p className="text-xl sm:text-2xl lg:text-3xl text-gray-900 leading-relaxed font-semibold">
                   {translatedText}
                 </p>
                 

@@ -20,8 +20,12 @@ export default function SettingsButton() {
     console.log('✅ Voice updated, new settings:', { ...settings, openaiVoice: voice });
   };
 
-  const handleSpeedChange = (speed: number) => {
-    updateSetting('ttsSpeed', speed);
+  const handleEnglishSpeedChange = (speed: number) => {
+    updateSetting('englishTtsSpeed', speed);
+  };
+
+  const handleVietnameseSpeedChange = (speed: number) => {
+    updateSetting('vietnameseTtsSpeed', speed);
   };
 
   const voiceOptions: { value: OpenAIVoice; label: string; description: string }[] = [
@@ -122,12 +126,13 @@ export default function SettingsButton() {
             )}
           </div>
 
-          <div className="pt-4">
-            <h4 className="text-base sm:text-sm font-medium bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">Speech Speed</h4>
-            <div className="space-y-3">
+          <div className="pt-4 space-y-6">
+            {/* English Speed */}
+            <div>
+              <h4 className="text-base sm:text-sm font-medium bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">English Speech Speed</h4>
               <div className="px-3">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-gray-600">Speed: {settings.ttsSpeed}x</span>
+                  <span className="text-sm text-gray-600">Speed: {settings.englishTtsSpeed}x</span>
                   <div className="flex space-x-1 text-xs text-gray-400">
                     <span>Slow</span>
                     <span>•</span>
@@ -139,11 +144,46 @@ export default function SettingsButton() {
                   min="0.5"
                   max="1.0"
                   step="0.1"
-                  value={settings.ttsSpeed}
-                  onChange={(e) => handleSpeedChange(parseFloat(e.target.value))}
+                  value={settings.englishTtsSpeed}
+                  onChange={(e) => handleEnglishSpeedChange(parseFloat(e.target.value))}
                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                   style={{
-                    background: `linear-gradient(to right, rgb(168 85 247) 0%, rgb(168 85 247) ${((settings.ttsSpeed - 0.5) / 0.5) * 100}%, rgb(229 231 235) ${((settings.ttsSpeed - 0.5) / 0.5) * 100}%, rgb(229 231 235) 100%)`
+                    background: `linear-gradient(to right, rgb(168 85 247) 0%, rgb(168 85 247) ${((settings.englishTtsSpeed - 0.5) / 0.5) * 100}%, rgb(229 231 235) ${((settings.englishTtsSpeed - 0.5) / 0.5) * 100}%, rgb(229 231 235) 100%)`
+                  }}
+                />
+                <div className="flex justify-between text-xs text-gray-400 mt-1">
+                  <span>0.5x</span>
+                  <span>0.6x</span>
+                  <span>0.7x</span>
+                  <span>0.8x</span>
+                  <span>0.9x</span>
+                  <span>1.0x</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Vietnamese Speed */}
+            <div>
+              <h4 className="text-base sm:text-sm font-medium bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-3">Vietnamese Speech Speed</h4>
+              <div className="px-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-600">Speed: {settings.vietnameseTtsSpeed}x</span>
+                  <div className="flex space-x-1 text-xs text-gray-400">
+                    <span>Slow</span>
+                    <span>•</span>
+                    <span>Fast</span>
+                  </div>
+                </div>
+                <input
+                  type="range"
+                  min="0.5"
+                  max="1.0"
+                  step="0.1"
+                  value={settings.vietnameseTtsSpeed}
+                  onChange={(e) => handleVietnameseSpeedChange(parseFloat(e.target.value))}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                  style={{
+                    background: `linear-gradient(to right, rgb(34 197 94) 0%, rgb(34 197 94) ${((settings.vietnameseTtsSpeed - 0.5) / 0.5) * 100}%, rgb(229 231 235) ${((settings.vietnameseTtsSpeed - 0.5) / 0.5) * 100}%, rgb(229 231 235) 100%)`
                   }}
                 />
                 <div className="flex justify-between text-xs text-gray-400 mt-1">

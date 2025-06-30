@@ -34,8 +34,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Adjust speed for Vietnamese (slightly slower for clarity)
-    const adjustedSpeed = speed * 0.9;
+    // Map speed from our range (0.5-1.0) to ElevenLabs range (0.7-1.0)
+    // 0.5 → 0.7, 1.0 → 1.0
+    // Formula: 0.7 + (speed - 0.5) * (1.0 - 0.7) / (1.0 - 0.5) = 0.7 + (speed - 0.5) * 0.6
+    const adjustedSpeed = 0.7 + (speed - 0.5) * 0.6;
 
     console.log('🇻🇳 ElevenLabs Vietnamese TTS Request:', {
       text: text.substring(0, 50) + (text.length > 50 ? '...' : ''),

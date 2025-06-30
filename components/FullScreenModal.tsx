@@ -9,6 +9,7 @@ import { useSettings } from '@/contexts/SettingsContext';
 interface FullScreenModalProps {
   isOpen: boolean;
   onClose: () => void;
+  originalText: string;
   translatedText: string;
   direction: TranslationDirection;
 }
@@ -16,10 +17,12 @@ interface FullScreenModalProps {
 export default function FullScreenModal({
   isOpen,
   onClose,
+  originalText,
   translatedText,
   direction
 }: FullScreenModalProps) {
-  const [isCopied, setIsCopied] = useState(false);
+  const [isCopiedOriginal, setIsCopiedOriginal] = useState(false);
+  const [isCopiedTranslated, setIsCopiedTranslated] = useState(false);
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [audioCache, setAudioCache] = useState<Record<string, string>>({});
@@ -42,13 +45,18 @@ export default function FullScreenModal({
     };
   }, [isOpen, onClose]);
 
-  const copyToClipboard = async (text: string) => {
+  const copyToClipboard = async (text: string, isOriginal = false) => {
     if (!text) return;
     
     try {
       await navigator.clipboard.writeText(text);
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
+      if (isOriginal) {
+        setIsCopiedOriginal(true);
+        setTimeout(() => setIsCopiedOriginal(false), 2000);
+      } else {
+        setIsCopiedTranslated(true);
+        setTimeout(() => setIsCopiedTranslated(false), 2000);
+      }
     } catch (err) {
       console.error('Failed to copy text:', err);
     }
@@ -69,9 +77,10 @@ export default function FullScreenModal({
       // Use ElevenLabs for Vietnamese, OpenAI for English
       const isVietnamese = language === 'vi-VN';
       const apiEndpoint = isVietnamese ? '/api/elevenlabs-tts' : '/api/text-to-speech';
+      const speedToUse = isVietnamese ? settings.vietnameseTtsSpeed : settings.englishTtsSpeed;
       const cacheKey = isVietnamese 
-        ? `elevenlabs-${text}-${language}-${settings.ttsSpeed}`
-        : `${text}-${language}-${settings.openaiVoice}-${settings.ttsSpeed}`;
+        ? `elevenlabs-${text}-${language}-${speedToUse}`
+        : `${text}-${language}-${settings.openaiVoice}-${speedToUse}`;
       
       if (audioCache[cacheKey]) {
         setIsPlayingAudio(true);
@@ -84,8 +93,8 @@ export default function FullScreenModal({
         setIsLoadingAudio(true);
         
         const requestBody = isVietnamese 
-          ? { text, speed: settings.ttsSpeed }
-          : { text, language, voice: settings.openaiVoice, speed: settings.ttsSpeed };
+          ? { text, speed: speedToUse }
+          : { text, language, voice: settings.openaiVoice, speed: speedToUse };
         
         try {
           const response = await fetch(apiEndpoint, {
@@ -125,7 +134,8 @@ export default function FullScreenModal({
     setIsPlayingAudio(true);
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = language;
-    utterance.rate = settings.ttsSpeed;
+    const speedToUse = language === 'vi-VN' ? settings.vietnameseTtsSpeed : settings.englishTtsSpeed;
+    utterance.rate = speedToUse;
     utterance.pitch = 1;
     
     utterance.onend = () => setIsPlayingAudio(false);
@@ -165,42 +175,78 @@ export default function FullScreenModal({
         </div>
 
 
-        {/* Translated Text */}
-        <div className="w-full max-w-4xl">
-          <div className="bg-gradient-to-br from-green-400/20 to-emerald-400/20 backdrop-blur-sm rounded-3xl p-8 sm:p-12 border border-green-400/30 shadow-2xl">
-            <div className="flex items-center justify-center mb-8">
-              <div className="flex space-x-4">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => speakText(translatedText, false)}
-                  disabled={isLoadingAudio || isPlayingAudio}
-                  className="p-3 text-white hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-110"
-                >
-                  {isLoadingAudio ? (
-                    <Loader2 className="w-6 h-6 animate-spin" />
-                  ) : (
-                    <Volume2 className="w-6 h-6" />
-                  )}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => copyToClipboard(translatedText)}
-                  className="p-3 text-white hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-110"
-                >
-                  {isCopied ? (
-                    <Check className="w-6 h-6" />
-                  ) : (
-                    <Copy className="w-6 h-6" />
-                  )}
-                </Button>
+        {/* Content - stacked vertically */}
+        <div className="w-full max-w-4xl space-y-8">
+          {/* Original Text */}
+          {originalText && (
+            <div className="bg-gradient-to-br from-blue-400/20 to-indigo-400/20 backdrop-blur-sm rounded-3xl p-6 sm:p-8 border border-blue-400/30 shadow-2xl">
+              <div className="text-center">
+                <div className="flex items-center justify-center mb-6">
+                  <h3 className="text-xl sm:text-2xl text-white/90 font-medium">
+                    Original ({direction === 'en-to-vi' ? 'English' : 'Vietnamese'})
+                  </h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => copyToClipboard(originalText, true)}
+                    className="ml-4 p-3 text-white hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-110"
+                  >
+                    {isCopiedOriginal ? (
+                      <Check className="w-6 h-6" />
+                    ) : (
+                      <Copy className="w-6 h-6" />
+                    )}
+                  </Button>
+                </div>
+                <p className="text-lg sm:text-xl lg:text-2xl text-white/80 font-normal leading-tight">
+                  {originalText}
+                </p>
               </div>
             </div>
-            <p className="text-4xl sm:text-5xl lg:text-6xl text-white font-medium leading-tight">
-              {translatedText}
-            </p>
-          </div>
+          )}
+
+          {/* Translated Text */}
+          {translatedText && (
+            <div className="bg-gradient-to-br from-green-400/20 to-emerald-400/20 backdrop-blur-sm rounded-3xl p-6 sm:p-8 border border-green-400/30 shadow-2xl">
+              <div className="text-center">
+                <div className="flex items-center justify-center mb-6">
+                  <h3 className="text-xl sm:text-2xl text-white/90 font-medium">
+                    Translation ({direction === 'en-to-vi' ? 'Vietnamese' : 'English'})
+                  </h3>
+                  <div className="flex space-x-2 ml-4">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => speakText(translatedText, false)}
+                      disabled={isLoadingAudio || isPlayingAudio}
+                      className="p-3 text-white hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-110"
+                    >
+                      {isLoadingAudio ? (
+                        <Loader2 className="w-6 h-6 animate-spin" />
+                      ) : (
+                        <Volume2 className="w-6 h-6" />
+                      )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => copyToClipboard(translatedText, false)}
+                      className="p-3 text-white hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-110"
+                    >
+                      {isCopiedTranslated ? (
+                        <Check className="w-6 h-6" />
+                      ) : (
+                        <Copy className="w-6 h-6" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+                <p className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl text-white font-semibold leading-tight">
+                  {translatedText}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Instructions */}
