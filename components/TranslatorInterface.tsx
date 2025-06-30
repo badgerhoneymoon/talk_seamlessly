@@ -8,6 +8,7 @@ import TranslationOutput from './TranslationOutput';
 import ModeToggle, { InputMode } from './ModeToggle';
 import TextInput from './TextInput';
 import SettingsButton from './SettingsButton';
+import FullScreenModal from './FullScreenModal';
 
 export type Language = 'vietnamese' | 'english';
 export type TranslationDirection = 'vi-to-en' | 'en-to-vi';
@@ -24,6 +25,7 @@ export default function TranslatorInterface() {
   const [result, setResult] = useState<TranscriptionResult | null>(null);
   const [error, setError] = useState<string>('');
   const [inputMode, setInputMode] = useState<InputMode>('voice');
+  const [showFullScreen, setShowFullScreen] = useState(false);
 
   const handleDirectionChange = (newDirection: TranslationDirection) => {
     setDirection(newDirection);
@@ -50,6 +52,7 @@ export default function TranslatorInterface() {
       const transcriptionResult = await transcribeAndTranslate(audioBlob, direction);
       setResult(transcriptionResult);
       setStatus('success');
+      setShowFullScreen(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Translation failed');
       setStatus('error');
@@ -64,6 +67,7 @@ export default function TranslatorInterface() {
       const translationResult = await translateText(text, direction);
       setResult(translationResult);
       setStatus('success');
+      setShowFullScreen(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Translation failed');
       setStatus('error');
@@ -185,6 +189,15 @@ export default function TranslatorInterface() {
           )}
         </div>
       </Card>
+
+      {/* Full Screen Modal */}
+      <FullScreenModal
+        isOpen={showFullScreen}
+        onClose={() => setShowFullScreen(false)}
+        originalText={result?.originalText || ''}
+        translatedText={result?.translatedText || ''}
+        direction={direction}
+      />
     </div>
   );
 }
