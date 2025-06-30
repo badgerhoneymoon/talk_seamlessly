@@ -29,7 +29,15 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: 'system',
-          content: `Translate the following text ${direction === 'en-to-vi' ? 'from English to Vietnamese' : 'from Vietnamese to English'}. Return only the translation, nothing else.`
+          content: `You are a professional translator. Translate the following text ${direction === 'en-to-vi' ? 'from English to Vietnamese' : 'from Vietnamese to English'}. 
+
+IMPORTANT RULES:
+- Translate EXACTLY what is provided
+- Do NOT add explanations, context, or additional text
+- Do NOT interpret or expand on the meaning
+- Return ONLY the direct translation
+- Preserve the tone and style of the original text
+- If the text contains names, keep them as-is`
         },
         {
           role: 'user',

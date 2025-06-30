@@ -9,7 +9,6 @@ import { useSettings } from '@/contexts/SettingsContext';
 interface FullScreenModalProps {
   isOpen: boolean;
   onClose: () => void;
-  originalText: string;
   translatedText: string;
   direction: TranslationDirection;
 }
@@ -17,7 +16,6 @@ interface FullScreenModalProps {
 export default function FullScreenModal({
   isOpen,
   onClose,
-  originalText,
   translatedText,
   direction
 }: FullScreenModalProps) {
@@ -151,52 +149,21 @@ export default function FullScreenModal({
       {/* Content */}
       <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-12">
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-2">
-            Translation Complete
+            Translation
           </h1>
           <p className="text-xl text-white/80">
             {sourceLanguage} → {targetLanguage}
           </p>
         </div>
 
-        {/* Original Text */}
-        {originalText && (
-          <div className="w-full max-w-4xl mb-8">
-            <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-6 sm:p-8 border border-white/20">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg sm:text-xl font-semibold text-white/90">
-                  Original ({sourceLanguage})
-                </h2>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => speakText(originalText, true)}
-                  disabled={isLoadingAudio || isPlayingAudio}
-                  className="p-2 text-white/80 hover:bg-white/20 rounded-xl transition-all duration-200"
-                >
-                  {isLoadingAudio ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <Volume2 className="w-5 h-5" />
-                  )}
-                </Button>
-              </div>
-              <p className="text-2xl sm:text-3xl text-white leading-relaxed">
-                {originalText}
-              </p>
-            </div>
-          </div>
-        )}
 
         {/* Translated Text */}
         <div className="w-full max-w-4xl">
           <div className="bg-gradient-to-br from-green-400/20 to-emerald-400/20 backdrop-blur-sm rounded-3xl p-8 sm:p-12 border border-green-400/30 shadow-2xl">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl sm:text-2xl font-semibold text-white">
-                Translation ({targetLanguage})
-              </h2>
-              <div className="flex space-x-3">
+            <div className="flex items-center justify-center mb-8">
+              <div className="flex space-x-4">
                 <Button
                   variant="ghost"
                   size="sm"

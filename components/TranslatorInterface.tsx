@@ -194,7 +194,6 @@ export default function TranslatorInterface() {
       <FullScreenModal
         isOpen={showFullScreen}
         onClose={() => setShowFullScreen(false)}
-        originalText={result?.originalText || ''}
         translatedText={result?.translatedText || ''}
         direction={direction}
       />

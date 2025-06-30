@@ -34,12 +34,15 @@ export async function POST(request: NextRequest) {
       type: audioFile.type,
     });
 
-    // Get transcription
+    // Get transcription with explicit language instruction
     const transcription = await openai.audio.transcriptions.create({
       model: 'gpt-4o-transcribe',
       file: file,
       response_format: 'text',
       language: direction === 'en-to-vi' ? 'en' : 'vi',
+      prompt: direction === 'en-to-vi' 
+        ? 'This audio is spoken in English. Transcribe exactly what is said in English.'
+        : 'This audio is spoken in Vietnamese. Transcribe exactly what is said in Vietnamese.',
     });
 
     // Get translation
@@ -48,7 +51,15 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: 'system',
-          content: `Translate the following text ${direction === 'en-to-vi' ? 'from English to Vietnamese' : 'from Vietnamese to English'}. Return only the translation, nothing else.`
+          content: `You are a professional translator. Translate the following text ${direction === 'en-to-vi' ? 'from English to Vietnamese' : 'from Vietnamese to English'}. 
+
+IMPORTANT RULES:
+- Translate EXACTLY what is provided
+- Do NOT add explanations, context, or additional text
+- Do NOT interpret or expand on the meaning
+- Return ONLY the direct translation
+- Preserve the tone and style of the original text
+- If the text contains names, keep them as-is`
         },
         {
           role: 'user',

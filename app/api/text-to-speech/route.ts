@@ -10,11 +10,12 @@ export async function POST(request: NextRequest) {
     const { text, language, voice, speed } = await request.json();
     
     console.log('🎯 TTS API received request:');
-    console.log('📝 Text:', text);
+    console.log('📝 Text to synthesize:', JSON.stringify(text));
     console.log('🌍 Language:', language);
     console.log('🎭 Voice:', voice);
     console.log('⚡ Speed:', speed);
     console.log('📏 Text length:', text?.length || 0);
+    console.log('🔤 Text characters:', text.split('').map((c: string) => `"${c}"`).join(', '));
     
     if (!text) {
       console.log('❌ No text provided');
@@ -28,13 +29,18 @@ export async function POST(request: NextRequest) {
     const selectedVoice = voice || (language === 'vi-VN' ? 'shimmer' : 'alloy');
     console.log('🎭 Selected voice:', selectedVoice);
     
+    // Clean and prepare text for TTS to avoid interpretation issues
+    const cleanText = text.trim();
+    
     const ttsParams = {
       model: 'tts-1' as const,
       voice: selectedVoice as 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer',
-      input: text,
+      input: cleanText,
       response_format: 'mp3' as const,
       speed: speed || 1.0,
     };
+    
+    console.log('📤 Sending to OpenAI TTS:', JSON.stringify(ttsParams));
     
     console.log('🔧 OpenAI TTS params:', ttsParams);
     
