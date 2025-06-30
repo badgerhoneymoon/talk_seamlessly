@@ -2,20 +2,22 @@
 
 import { useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Mic, Square } from 'lucide-react';
+import { Mic, Square, Loader2 } from 'lucide-react';
 
 interface RecordButtonProps {
   onStart: () => void;
   onStop: (audioBlob: Blob) => void;
   disabled?: boolean;
   isRecording?: boolean;
+  isProcessing?: boolean;
 }
 
 export default function RecordButton({ 
   onStart, 
   onStop, 
   disabled = false,
-  isRecording = false 
+  isRecording = false,
+  isProcessing = false
 }: RecordButtonProps) {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -82,29 +84,37 @@ export default function RecordButton({
       <div className="relative">
         {/* Outer glow ring */}
         <div className={`absolute inset-0 rounded-full transition-all duration-500 ${
-          isRecording
+          isProcessing
+            ? 'bg-gradient-to-r from-blue-400 to-purple-500 blur-lg scale-110'
+            : isRecording
             ? 'bg-gradient-to-r from-red-400 to-pink-500 blur-lg scale-110'
             : 'bg-gradient-to-r from-blue-400 to-purple-500 blur-md scale-105 hover:scale-125'
-        }`} style={isRecording ? { animation: 'pulse 2s ease-in-out infinite' } : {}} />
+        }`} style={isProcessing || isRecording ? { animation: 'pulse 2s ease-in-out infinite' } : {}} />
         
         {/* Middle ring */}
         <div className={`absolute inset-2 rounded-full transition-all duration-300 ${
-          isRecording
+          isProcessing
+            ? 'bg-gradient-to-r from-blue-300 to-purple-400 blur-sm'
+            : isRecording
             ? 'bg-gradient-to-r from-red-300 to-pink-400 blur-sm'
             : 'bg-gradient-to-r from-blue-300 to-purple-400 blur-sm hover:blur-lg'
-        }`} style={isRecording ? { animation: 'pulse 2.5s ease-in-out infinite 0.5s' } : {}} />
+        }`} style={isProcessing || isRecording ? { animation: 'pulse 2.5s ease-in-out infinite 0.5s' } : {}} />
         
         <Button
           className={`relative w-20 h-20 sm:w-24 sm:h-24 rounded-full transition-all duration-300 transform select-none shadow-2xl ${
-            isRecording
+            isProcessing
+              ? 'bg-gradient-to-r from-blue-500 to-purple-600 scale-110'
+              : isRecording
               ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 scale-110'
               : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 hover:scale-105 active:scale-95'
-          } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-          disabled={disabled}
+          } ${disabled || isProcessing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+          disabled={disabled || isProcessing}
           onClick={handleClick}
         >
           <div className="flex items-center justify-center">
-            {isRecording ? (
+            {isProcessing ? (
+              <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-lg animate-spin" />
+            ) : isRecording ? (
               <Square className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-lg" />
             ) : (
               <Mic className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-lg" />
@@ -124,12 +134,12 @@ export default function RecordButton({
 
       <div className="text-center space-y-1">
         <p className={`text-sm sm:text-base font-semibold transition-colors duration-300 ${
-          isRecording ? 'text-red-600' : 'text-gray-700'
+          isProcessing ? 'text-blue-600' : isRecording ? 'text-red-600' : 'text-gray-700'
         }`}>
-          {isRecording ? 'Recording...' : 'Ready to Record'}
+          {isProcessing ? 'Translating...' : isRecording ? 'Recording...' : 'Ready to Record'}
         </p>
         <p className="text-xs sm:text-sm text-gray-500">
-          {isRecording ? 'Tap to stop and translate' : 'Tap the microphone to start'}
+          {isProcessing ? 'Please wait while we process your audio' : isRecording ? 'Tap to stop and translate' : 'Tap the microphone to start'}
         </p>
       </div>
     </div>

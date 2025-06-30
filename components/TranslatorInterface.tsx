@@ -155,6 +155,7 @@ export default function TranslatorInterface() {
                   onStop={handleRecordingStop}
                   disabled={status === 'processing'}
                   isRecording={status === 'recording'}
+                  isProcessing={status === 'processing'}
                 />
               ) : (
                 <TextInput
