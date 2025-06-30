@@ -28,8 +28,8 @@ export default function ModeToggle({
           className={`flex items-center justify-center space-x-1 sm:space-x-2 px-6 py-4 sm:px-6 sm:py-3 rounded-xl font-semibold transition-all duration-300 text-lg sm:text-base ${
             mode === 'voice' 
               ? 'bg-white text-blue-700 shadow-lg' 
-              : 'text-gray-600 hover:text-gray-800'
-          } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-105'}`}
+              : 'text-gray-600'
+          } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
         >
           <Mic className="hidden sm:block w-4 h-4" />
           <span className="hidden sm:inline">Voice</span>
@@ -42,8 +42,8 @@ export default function ModeToggle({
           className={`flex items-center justify-center space-x-1 sm:space-x-2 px-6 py-4 sm:px-6 sm:py-3 rounded-xl font-semibold transition-all duration-300 text-lg sm:text-base ${
             mode === 'text' 
               ? 'bg-white text-blue-700 shadow-lg' 
-              : 'text-gray-600 hover:text-gray-800'
-          } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-105'}`}
+              : 'text-gray-600'
+          } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
         >
           <Type className="hidden sm:block w-4 h-4" />
           <span className="hidden sm:inline">Type</span>
