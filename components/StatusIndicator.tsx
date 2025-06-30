@@ -71,7 +71,6 @@ export default function StatusIndicator({
         status === 'idle' ? 'bg-gray-100/50' :
         status === 'recording' ? 'bg-red-100/60 shadow-lg' :
         status === 'processing' ? 'bg-blue-100/60 shadow-lg' :
-        status === 'success' ? 'bg-green-100/60 shadow-lg' :
         'bg-red-100/60 shadow-lg'
       }`}>
         {config.icon && (
