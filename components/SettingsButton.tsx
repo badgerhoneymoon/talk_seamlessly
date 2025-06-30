@@ -33,6 +33,7 @@ export default function SettingsButton() {
     { value: 'shimmer', label: 'Shimmer', description: 'Bright, cheerful' },
   ];
 
+
   if (!isOpen) {
     return (
       <Button

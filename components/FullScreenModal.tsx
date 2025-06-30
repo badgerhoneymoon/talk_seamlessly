@@ -66,7 +66,12 @@ export default function FullScreenModal({
       : (direction === 'en-to-vi' ? 'vi-VN' : 'en-US');
     
     if (settings.ttsProvider === 'openai') {
-      const cacheKey = `${text}-${language}-${settings.openaiVoice}-${settings.ttsSpeed}`;
+      // Use ElevenLabs for Vietnamese, OpenAI for English
+      const isVietnamese = language === 'vi-VN';
+      const apiEndpoint = isVietnamese ? '/api/elevenlabs-tts' : '/api/text-to-speech';
+      const cacheKey = isVietnamese 
+        ? `elevenlabs-${text}-${language}-${settings.ttsSpeed}`
+        : `${text}-${language}-${settings.openaiVoice}-${settings.ttsSpeed}`;
       
       if (audioCache[cacheKey]) {
         setIsPlayingAudio(true);
@@ -77,16 +82,16 @@ export default function FullScreenModal({
         audio.addEventListener('error', () => setIsPlayingAudio(false));
       } else {
         setIsLoadingAudio(true);
+        
+        const requestBody = isVietnamese 
+          ? { text, speed: settings.ttsSpeed }
+          : { text, language, voice: settings.openaiVoice, speed: settings.ttsSpeed };
+        
         try {
-          const response = await fetch('/api/text-to-speech', {
+          const response = await fetch(apiEndpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              text,
-              language,
-              voice: settings.openaiVoice,
-              speed: settings.ttsSpeed,
-            }),
+            body: JSON.stringify(requestBody),
           });
 
           if (!response.ok) throw new Error('TTS request failed');
@@ -105,9 +110,10 @@ export default function FullScreenModal({
           audio.addEventListener('error', () => setIsPlayingAudio(false));
           
         } catch (error) {
-          console.error('OpenAI TTS Error:', error);
+          console.error(`${isVietnamese ? 'ElevenLabs' : 'OpenAI'} TTS Error:`, error);
           setIsLoadingAudio(false);
-          playBrowserTTS(text, language);
+          // NO FALLBACK IN DEV MODE - LET FAILURES FAIL LOUDLY
+          throw error;
         }
       }
     } else {

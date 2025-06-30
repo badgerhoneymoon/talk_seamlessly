@@ -122,3 +122,17 @@ async function transcribeAndTranslate(audioBlob, fromLang, toLang) {
 - PWA installation testing
 - Audio recording permissions testing
 - API integration testing
+
+# IMPORTANT DEVELOPMENT RULES
+
+## NO FALLBACKS IN DEVELOPMENT MODE
+
+**NEVER USE FALLBACKS DURING DEVELOPMENT - THEY HIDE BUGS AND PREVENT PROPER TESTING!**
+
+- DO NOT add fallback to browser TTS when OpenAI/ElevenLabs TTS fails
+- DO NOT add fallback API calls when primary API fails
+- DO NOT suppress errors with fallbacks
+- LET FAILURES FAIL LOUDLY so bugs can be identified and fixed
+- Only add fallbacks in production after thorough testing
+
+**If an API fails, show the error - don't hide it with fallbacks!**

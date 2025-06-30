@@ -62,7 +62,12 @@ export default function TranslationOutput({
     console.log('📋 Full settings object:', settings);
     
     if (settings.ttsProvider === 'openai') {
-      const cacheKey = `${text}-${language}-${settings.openaiVoice}-${settings.ttsSpeed}`;
+      // Use ElevenLabs for Vietnamese, OpenAI for English
+      const isVietnamese = language === 'vi-VN';
+      const apiEndpoint = isVietnamese ? '/api/elevenlabs-tts' : '/api/text-to-speech';
+      const cacheKey = isVietnamese 
+        ? `elevenlabs-${text}-${language}-${settings.ttsSpeed}`
+        : `${text}-${language}-${settings.openaiVoice}-${settings.ttsSpeed}`;
       
       // Check if we have cached audio
       if (audioCache[cacheKey]) {
@@ -81,20 +86,20 @@ export default function TranslationOutput({
       } else {
         // Fetch new audio and cache it
         setIsLoadingAudio(true);
-        console.log('🌐 Sending to OpenAI TTS API:', { text, language, voice: settings.openaiVoice, speed: settings.ttsSpeed });
+        
+        const requestBody = isVietnamese 
+          ? { text, speed: settings.ttsSpeed }
+          : { text, language, voice: settings.openaiVoice, speed: settings.ttsSpeed };
+        
+        console.log(`🌐 Sending to ${isVietnamese ? 'ElevenLabs' : 'OpenAI'} TTS API:`, requestBody);
         
         try {
-          const response = await fetch('/api/text-to-speech', {
+          const response = await fetch(apiEndpoint, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-              text,
-              language,
-              voice: settings.openaiVoice,
-              speed: settings.ttsSpeed,
-            }),
+            body: JSON.stringify(requestBody),
           });
 
           if (!response.ok) {
@@ -104,7 +109,7 @@ export default function TranslationOutput({
           const audioBlob = await response.blob();
           const audioUrl = URL.createObjectURL(audioBlob);
           
-          console.log('✅ OpenAI TTS response received, audio size:', audioBlob.size, 'bytes');
+          console.log(`✅ ${isVietnamese ? 'ElevenLabs' : 'OpenAI'} TTS response received, audio size:`, audioBlob.size, 'bytes');
           
           // Cache the audio URL
           setAudioCache(prev => ({ ...prev, [cacheKey]: audioUrl }));
@@ -124,10 +129,10 @@ export default function TranslationOutput({
           });
           
         } catch (error) {
-          console.error('❌ OpenAI TTS Error:', error);
+          console.error(`❌ ${isVietnamese ? 'ElevenLabs' : 'OpenAI'} TTS Error:`, error);
           setIsLoadingAudio(false);
-          // Fallback to browser TTS
-          playBrowserTTS(text, language);
+          // NO FALLBACK IN DEV MODE - LET FAILURES FAIL LOUDLY
+          throw error;
         }
       }
     } else {
