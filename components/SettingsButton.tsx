@@ -62,7 +62,7 @@ export default function SettingsButton() {
               variant="ghost"
               size="sm"
               onClick={() => setIsOpen(false)}
-              className="p-1 hover:bg-purple-50 rounded-lg"
+              className="p-2 hover:bg-purple-50 rounded-full"
             >
               <X className="w-4 h-4 text-purple-600" />
             </Button>
