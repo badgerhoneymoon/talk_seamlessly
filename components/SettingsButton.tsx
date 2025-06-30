@@ -44,7 +44,7 @@ export default function SettingsButton() {
         variant="ghost"
         size="sm"
         onClick={() => setIsOpen(true)}
-        className="absolute top-4 right-4 p-3 hover:bg-white/60 rounded-xl transition-all duration-200 hover:scale-110 active:scale-95"
+        className="absolute top-2 right-2 p-3 hover:bg-white/60 rounded-xl transition-all duration-200 hover:scale-110 active:scale-95"
         title="Settings"
       >
         <Settings className="w-6 h-6 text-purple-600" />

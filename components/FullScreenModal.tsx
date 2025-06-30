@@ -70,14 +70,18 @@ export default function FullScreenModal({
     
     // Determine language
     const language = isOriginal 
-      ? (direction === 'en-to-vi' ? 'en-US' : 'vi-VN')
-      : (direction === 'en-to-vi' ? 'vi-VN' : 'en-US');
+      ? (direction === 'en-to-vi' ? 'en-US' : 
+         direction === 'vi-to-en' ? 'vi-VN' :
+         direction === 'ru-to-vi' ? 'ru-RU' : 'vi-VN')
+      : (direction === 'en-to-vi' ? 'vi-VN' :
+         direction === 'vi-to-en' ? 'en-US' :
+         direction === 'ru-to-vi' ? 'vi-VN' : 'ru-RU');
     
     if (settings.ttsProvider === 'openai') {
-      // Use ElevenLabs for Vietnamese, OpenAI for English
+      // Use ElevenLabs for Vietnamese, OpenAI for English and Russian
       const isVietnamese = language === 'vi-VN';
       const apiEndpoint = isVietnamese ? '/api/elevenlabs-tts' : '/api/text-to-speech';
-      const speedToUse = isVietnamese ? settings.vietnameseTtsSpeed : settings.englishTtsSpeed;
+      const speedToUse = isVietnamese ? settings.vietnameseTtsSpeed : settings.englishTtsSpeed; // Use English speed for Russian too
       const cacheKey = isVietnamese 
         ? `elevenlabs-${text}-${language}-${speedToUse}`
         : `${text}-${language}-${settings.openaiVoice}-${speedToUse}`;
@@ -146,26 +150,34 @@ export default function FullScreenModal({
 
   if (!isOpen) return null;
 
-  const targetLanguage = direction === 'en-to-vi' ? 'Vietnamese' : 'English';
-  const sourceLanguage = direction === 'en-to-vi' ? 'English' : 'Vietnamese';
+  const getLanguageName = (dir: TranslationDirection, isTarget: boolean) => {
+    if (dir === 'en-to-vi') return isTarget ? 'Vietnamese' : 'English';
+    if (dir === 'vi-to-en') return isTarget ? 'English' : 'Vietnamese';
+    if (dir === 'ru-to-vi') return isTarget ? 'Vietnamese' : 'Russian';
+    if (dir === 'vi-to-ru') return isTarget ? 'Russian' : 'Vietnamese';
+    return 'Unknown';
+  };
+
+  const targetLanguage = getLanguageName(direction, true);
+  const sourceLanguage = getLanguageName(direction, false);
 
   return (
-    <div className="fixed inset-0 z-50 bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900">
+    <div className="fixed inset-0 z-50 bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 overflow-y-auto">
       {/* Close button */}
       <Button
         variant="ghost"
         size="sm"
         onClick={onClose}
-        className="absolute top-4 right-4 p-3 text-white hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-110"
+        className="fixed top-4 right-4 p-3 text-white hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-110 z-50"
         title="Close (ESC)"
       >
         <X className="w-6 h-6" />
       </Button>
 
       {/* Content */}
-      <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center">
+      <div className="min-h-screen p-6 pt-20">
         {/* Header */}
-        <div className="mb-12">
+        <div className="text-center mb-8">
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-2">
             Translation
           </h1>
@@ -176,14 +188,14 @@ export default function FullScreenModal({
 
 
         {/* Content - stacked vertically */}
-        <div className="w-full max-w-4xl space-y-8">
+        <div className="max-w-4xl mx-auto space-y-8">
           {/* Original Text */}
           {originalText && (
             <div className="bg-gradient-to-br from-blue-400/20 to-indigo-400/20 backdrop-blur-sm rounded-3xl p-6 sm:p-8 border border-blue-400/30 shadow-2xl">
               <div className="text-center">
                 <div className="flex items-center justify-center mb-6">
                   <h3 className="text-xl sm:text-2xl text-white/90 font-medium">
-                    Original ({direction === 'en-to-vi' ? 'English' : 'Vietnamese'})
+                    Original ({sourceLanguage})
                   </h3>
                   <Button
                     variant="ghost"
@@ -211,7 +223,7 @@ export default function FullScreenModal({
               <div className="text-center">
                 <div className="flex items-center justify-center mb-6">
                   <h3 className="text-xl sm:text-2xl text-white/90 font-medium">
-                    Translation ({direction === 'en-to-vi' ? 'Vietnamese' : 'English'})
+                    Translation ({targetLanguage})
                   </h3>
                   <div className="flex space-x-2 ml-4">
                     <Button
@@ -250,9 +262,11 @@ export default function FullScreenModal({
         </div>
 
         {/* Instructions */}
-        <p className="text-white/60 mt-8 text-lg">
-          Press ESC or click × to close
-        </p>
+        <div className="text-center mt-8 pb-6">
+          <p className="text-white/60 text-lg">
+            Press ESC or click × to close
+          </p>
+        </div>
       </div>
     </div>
   );

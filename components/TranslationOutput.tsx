@@ -54,8 +54,12 @@ export default function TranslationOutput({
     
     // Determine language
     const language = isOriginal 
-      ? (direction === 'en-to-vi' ? 'en-US' : 'vi-VN')
-      : (direction === 'en-to-vi' ? 'vi-VN' : 'en-US');
+      ? (direction === 'en-to-vi' ? 'en-US' : 
+         direction === 'vi-to-en' ? 'vi-VN' :
+         direction === 'ru-to-vi' ? 'ru-RU' : 'vi-VN')
+      : (direction === 'en-to-vi' ? 'vi-VN' :
+         direction === 'vi-to-en' ? 'en-US' :
+         direction === 'ru-to-vi' ? 'vi-VN' : 'ru-RU');
     
     // Debug logging
     console.log('🔊 TTS Debug Info:');
@@ -68,10 +72,10 @@ export default function TranslationOutput({
     console.log('📋 Full settings object:', settings);
     
     if (settings.ttsProvider === 'openai') {
-      // Use ElevenLabs for Vietnamese, OpenAI for English
+      // Use ElevenLabs for Vietnamese, OpenAI for English and Russian
       const isVietnamese = language === 'vi-VN';
       const apiEndpoint = isVietnamese ? '/api/elevenlabs-tts' : '/api/text-to-speech';
-      const speedToUse = isVietnamese ? settings.vietnameseTtsSpeed : settings.englishTtsSpeed;
+      const speedToUse = isVietnamese ? settings.vietnameseTtsSpeed : settings.englishTtsSpeed; // Use English speed for Russian too
       const cacheKey = isVietnamese 
         ? `elevenlabs-${text}-${language}-${speedToUse}`
         : `${text}-${language}-${settings.openaiVoice}-${speedToUse}`;
@@ -175,7 +179,16 @@ export default function TranslationOutput({
 
   if (!originalText && !translatedText) return null;
 
-  const targetLanguage = direction === 'en-to-vi' ? 'Vietnamese' : 'English';
+  const getLanguageName = (dir: TranslationDirection, isTarget: boolean) => {
+    if (dir === 'en-to-vi') return isTarget ? 'Vietnamese' : 'English';
+    if (dir === 'vi-to-en') return isTarget ? 'English' : 'Vietnamese';
+    if (dir === 'ru-to-vi') return isTarget ? 'Vietnamese' : 'Russian';
+    if (dir === 'vi-to-ru') return isTarget ? 'Russian' : 'Vietnamese';
+    return 'Unknown';
+  };
+
+  const targetLanguage = getLanguageName(direction, true);
+  const sourceLanguage = getLanguageName(direction, false);
 
   return (
     <div className="space-y-4">
@@ -191,7 +204,7 @@ export default function TranslationOutput({
                 <div className="flex items-center space-x-2 sm:space-x-3">
                   <div className="w-2 h-2 sm:w-3 sm:h-3 bg-gradient-to-r from-blue-400 to-indigo-500 rounded-full animate-pulse" />
                   <h3 className="text-base sm:text-lg font-bold text-gray-800">
-                    Original ({direction === 'en-to-vi' ? 'English' : 'Vietnamese'})
+                    Original ({sourceLanguage})
                   </h3>
                 </div>
                 

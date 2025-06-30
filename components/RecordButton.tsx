@@ -26,15 +26,30 @@ export default function RecordButton({
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ 
         audio: {
-          sampleRate: 16000,
+          sampleRate: 44100, // Back to standard sample rate
           channelCount: 1,
           echoCancellation: true,
-          noiseSuppression: true
+          noiseSuppression: true,
+          autoGainControl: true
         }
       });
       
+      // Try different formats in order of preference
+      let mimeType = 'audio/webm;codecs=opus';
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = 'audio/webm';
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          mimeType = 'audio/mp4';
+          if (!MediaRecorder.isTypeSupported(mimeType)) {
+            mimeType = 'audio/wav';
+          }
+        }
+      }
+      
+      console.log('🎤 Recording with MIME type:', mimeType);
+      
       const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'audio/webm;codecs=opus'
+        mimeType: mimeType
       });
       
       mediaRecorderRef.current = mediaRecorder;
@@ -47,7 +62,28 @@ export default function RecordButton({
       };
       
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        const audioBlob = new Blob(chunksRef.current, { type: mimeType });
+        console.log('🎤 Recording completed:');
+        console.log('📏 Audio blob size:', audioBlob.size, 'bytes');
+        console.log('🎵 Audio blob type:', audioBlob.type);
+        
+        if (audioBlob.size === 0) {
+          console.error('❌ Audio blob is empty!');
+          alert('Recording failed - no audio data captured');
+          return;
+        }
+
+        // Create download link for debugging
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const link = document.createElement('a');
+        link.href = audioUrl;
+        link.download = `recording-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.${mimeType.includes('mp4') ? 'mp4' : mimeType.includes('webm') ? 'webm' : 'wav'}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        console.log('💾 Audio file saved for debugging:', link.download);
+        
         onStop(audioBlob);
         
         // Clean up stream
@@ -113,11 +149,11 @@ export default function RecordButton({
         >
           <div className="flex items-center justify-center">
             {isProcessing ? (
-              <Loader2 className="w-10 h-10 sm:w-8 sm:h-8 text-white drop-shadow-lg animate-spin" />
+              <Loader2 className="w-8 h-8 text-white drop-shadow-lg animate-spin" />
             ) : isRecording ? (
-              <Square className="w-10 h-10 sm:w-8 sm:h-8 text-white drop-shadow-lg" />
+              <Square className="w-8 h-8 text-white drop-shadow-lg" />
             ) : (
-              <Mic className="w-10 h-10 sm:w-8 sm:h-8 text-white drop-shadow-lg" />
+              <Mic className="w-8 h-8 text-white drop-shadow-lg" />
             )}
           </div>
           

@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!direction || !['vi-to-en', 'en-to-vi'].includes(direction)) {
+    if (!direction || !['vi-to-en', 'en-to-vi', 'vi-to-ru', 'ru-to-vi'].includes(direction)) {
       return NextResponse.json(
         { error: 'Invalid translation direction' },
         { status: 400 }
@@ -29,7 +29,13 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: 'system',
-          content: `You are a professional translator. Translate the following text ${direction === 'en-to-vi' ? 'from English to Vietnamese' : 'from Vietnamese to English'}. 
+          content: `You are a professional translator. Translate the following text ${
+            direction === 'en-to-vi' ? 'from English to Vietnamese' :
+            direction === 'vi-to-en' ? 'from Vietnamese to English' :
+            direction === 'ru-to-vi' ? 'from Russian to Vietnamese' :
+            direction === 'vi-to-ru' ? 'from Vietnamese to Russian' :
+            'between languages'
+          }. 
 
 IMPORTANT RULES:
 - Translate EXACTLY what is provided

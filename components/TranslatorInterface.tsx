@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import LanguageToggle from './LanguageToggle';
+import LanguageSwitcher from './LanguageSwitcher';
 import RecordButton from './RecordButton';
 import TranslationOutput from './TranslationOutput';
 import ModeToggle, { InputMode } from './ModeToggle';
@@ -11,7 +12,7 @@ import SettingsButton from './SettingsButton';
 import FullScreenModal from './FullScreenModal';
 
 export type Language = 'vietnamese' | 'english';
-export type TranslationDirection = 'vi-to-en' | 'en-to-vi';
+export type TranslationDirection = 'vi-to-en' | 'en-to-vi' | 'vi-to-ru' | 'ru-to-vi';
 export type Status = 'idle' | 'recording' | 'processing' | 'success' | 'error';
 
 interface TranscriptionResult {
@@ -119,6 +120,13 @@ export default function TranslatorInterface() {
 
   return (
     <div className="relative">
+      {/* Language Switcher - Top left */}
+      <LanguageSwitcher
+        direction={direction}
+        onDirectionChange={handleDirectionChange}
+        disabled={status === 'recording' || status === 'processing'}
+      />
+      
       {/* Background gradient blur effect */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-3xl blur-xl opacity-60 -z-10 transform scale-110"></div>
       
@@ -132,22 +140,25 @@ export default function TranslatorInterface() {
           <div className="absolute bottom-10 right-10 w-24 h-24 bg-gradient-to-br from-indigo-400 to-pink-400 rounded-full"></div>
         </div>
 
-        <div className="relative z-10 space-y-6 sm:space-y-8">
+        <div className="relative z-10 space-y-6 sm:space-y-8" style={{paddingTop: '32px'}}>
           {/* Header section with enhanced typography */}
           <div className="text-center space-y-1 sm:space-y-2">
             <h1 className="text-3xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-              Talk Seamlessly
+            Seamlessly
             </h1>
             <p className="text-base sm:text-sm text-gray-500 font-medium">
-              Vietnamese ↔ English Translation
+            Feel understood in Vietnam
             </p>
           </div>
 
-          <LanguageToggle 
-            direction={direction} 
-            onDirectionChange={handleDirectionChange}
-            disabled={status === 'recording' || status === 'processing'}
-          />
+          {/* Direction Toggle */}
+          <div className="flex justify-center">
+            <LanguageToggle 
+              direction={direction} 
+              onDirectionChange={handleDirectionChange}
+              disabled={status === 'recording' || status === 'processing'}
+            />
+          </div>
 
           <ModeToggle
             mode={inputMode}
@@ -170,7 +181,9 @@ export default function TranslatorInterface() {
                   onSubmit={handleTextSubmit}
                   disabled={status === 'processing'}
                   isProcessing={status === 'processing'}
-                  placeholder={`Type in ${direction === 'en-to-vi' ? 'English' : 'Vietnamese'} to translate...`}
+                  placeholder={`Type in ${direction === 'en-to-vi' ? 'English' : 
+                                        direction === 'vi-to-en' ? 'Vietnamese' :
+                                        direction === 'ru-to-vi' ? 'Russian' : 'Vietnamese'} to translate...`}
                 />
               )}
             </div>

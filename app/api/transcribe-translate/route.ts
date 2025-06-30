@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!direction || !['vi-to-en', 'en-to-vi'].includes(direction)) {
+    if (!direction || !['vi-to-en', 'en-to-vi', 'vi-to-ru', 'ru-to-vi'].includes(direction)) {
       return NextResponse.json(
         { error: 'Invalid translation direction' },
         { status: 400 }
@@ -29,21 +29,112 @@ export async function POST(request: NextRequest) {
     const bytes = await audioFile.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
+    console.log('🎤 Audio Debug Info:');
+    console.log('📁 Original file name:', audioFile.name);
+    console.log('📏 Original file size:', audioFile.size, 'bytes');
+    console.log('🎵 Original file type:', audioFile.type);
+    console.log('⚡ Buffer size:', buffer.length, 'bytes');
+
+    // Validate audio file size (OpenAI limit is 25MB)
+    if (audioFile.size > 25 * 1024 * 1024) {
+      return NextResponse.json(
+        { error: 'Audio file too large. Maximum size is 25MB.' },
+        { status: 400 }
+      );
+    }
+
+    // Validate minimum audio size
+    if (audioFile.size < 1000) {
+      console.warn('⚠️ Very small audio file detected');
+    }
+
+    // Determine optimal file extension based on MIME type
+    let fileName = audioFile.name || 'recording';
+    let fileType = audioFile.type;
+    
+    if (audioFile.type.includes('mp4')) {
+      fileName = fileName.endsWith('.mp4') ? fileName : 'recording.mp4';
+      fileType = 'audio/mp4';
+    } else if (audioFile.type.includes('webm')) {
+      fileName = fileName.endsWith('.webm') ? fileName : 'recording.webm';
+      fileType = 'audio/webm';
+    } else if (audioFile.type.includes('wav')) {
+      fileName = fileName.endsWith('.wav') ? fileName : 'recording.wav';
+      fileType = 'audio/wav';
+    } else {
+      // Default to mp4 for better compatibility
+      fileName = 'recording.mp4';
+      fileType = 'audio/mp4';
+    }
+
+    console.log('🎤 Normalized file info:');
+    console.log('📁 File name:', fileName);
+    console.log('🎵 File type:', fileType);
+
     // Create a File-like object that OpenAI expects
-    const file = new File([buffer], audioFile.name, {
-      type: audioFile.type,
+    const file = new File([buffer], fileName, {
+      type: fileType,
     });
 
     // Get transcription with explicit language instruction
+    const getLanguageCode = (dir: string) => {
+      if (dir === 'en-to-vi') return 'en';
+      if (dir === 'vi-to-en') return 'vi';
+      if (dir === 'ru-to-vi') return 'ru';
+      if (dir === 'vi-to-ru') return 'vi';
+      return 'en';
+    };
+
+    const getPrompt = (dir: string) => {
+      if (dir === 'en-to-vi') return 'This is clear English speech. Transcribe every word exactly as spoken, including any incomplete sentences or natural speech patterns.';
+      if (dir === 'vi-to-en') return 'This is clear Vietnamese speech. Transcribe every word exactly as spoken, including any incomplete sentences or natural speech patterns.';
+      if (dir === 'ru-to-vi') return 'This is clear Russian speech. Transcribe every word exactly as spoken, including any incomplete sentences or natural speech patterns.';
+      if (dir === 'vi-to-ru') return 'This is clear Vietnamese speech. Transcribe every word exactly as spoken, including any incomplete sentences or natural speech patterns.';
+      return 'Transcribe every word exactly as spoken, including any incomplete sentences or natural speech patterns.';
+    };
+
+    console.log('🤖 Sending to OpenAI Transcription:');
+    console.log('📝 Model:', 'gpt-4o-transcribe');
+    console.log('🌍 Language:', getLanguageCode(direction));
+    console.log('💬 Prompt:', getPrompt(direction));
+    console.log('📁 File size being sent:', file.size, 'bytes');
+
     const transcription = await openai.audio.transcriptions.create({
       model: 'gpt-4o-transcribe',
       file: file,
       response_format: 'text',
-      language: direction === 'en-to-vi' ? 'en' : 'vi',
-      prompt: direction === 'en-to-vi' 
-        ? 'This audio is spoken in English. Transcribe exactly what is said in English.'
-        : 'This audio is spoken in Vietnamese. Transcribe exactly what is said in Vietnamese.',
+      language: getLanguageCode(direction),
+      prompt: getPrompt(direction),
+      temperature: 0.0, // Use deterministic transcription for consistency
     });
+
+    console.log('✅ Transcription received:');
+    console.log('📝 Raw transcription:', `"${transcription}"`);
+    console.log('📏 Transcription length:', transcription.length, 'characters');
+
+    // Validate transcription quality
+    if (!transcription || transcription.trim().length === 0) {
+      console.error('❌ Empty transcription received');
+      return NextResponse.json(
+        { error: 'No speech detected in audio. Please try speaking more clearly or closer to the microphone.' },
+        { status: 400 }
+      );
+    }
+
+    if (transcription.trim().length < 3) {
+      console.warn('⚠️ Very short transcription received:', transcription);
+    }
+
+    // Check for common transcription issues
+    const suspiciousPatterns = [
+      /^[\s\.\,\!\?\-]*$/,  // Only punctuation
+      /^(um|uh|hmm|er)[\s\.\,\!\?]*$/i,  // Only filler words
+    ];
+
+    const isSuspicious = suspiciousPatterns.some(pattern => pattern.test(transcription.trim()));
+    if (isSuspicious) {
+      console.warn('⚠️ Suspicious transcription pattern detected:', transcription);
+    }
 
     // Get translation
     const translationResponse = await openai.chat.completions.create({
@@ -51,7 +142,13 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: 'system',
-          content: `You are a professional translator. Translate the following text ${direction === 'en-to-vi' ? 'from English to Vietnamese' : 'from Vietnamese to English'}. 
+          content: `You are a professional translator. Translate the following text ${
+            direction === 'en-to-vi' ? 'from English to Vietnamese' :
+            direction === 'vi-to-en' ? 'from Vietnamese to English' :
+            direction === 'ru-to-vi' ? 'from Russian to Vietnamese' :
+            direction === 'vi-to-ru' ? 'from Vietnamese to Russian' :
+            'between languages'
+          }. 
 
 IMPORTANT RULES:
 - Translate EXACTLY what is provided
