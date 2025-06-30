@@ -31,6 +31,7 @@ export default function ModeToggle({
               : 'text-gray-600 hover:text-gray-800'
           } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-105'}`}
         >
+          <Mic className="hidden sm:block w-4 h-4" />
           <span className="hidden sm:inline">Voice</span>
           <span className="sm:hidden">🎤</span>
         </button>
@@ -44,6 +45,7 @@ export default function ModeToggle({
               : 'text-gray-600 hover:text-gray-800'
           } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-105'}`}
         >
+          <Type className="hidden sm:block w-4 h-4" />
           <span className="hidden sm:inline">Type</span>
           <span className="sm:hidden">✏️</span>
         </button>
