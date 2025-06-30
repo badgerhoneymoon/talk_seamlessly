@@ -25,7 +25,7 @@ export default function ModeToggle({
         <button
           onClick={!disabled ? toggleMode : undefined}
           disabled={disabled}
-          className={`flex items-center space-x-1 sm:space-x-2 px-3 py-2 sm:px-6 sm:py-3 rounded-xl font-semibold transition-all duration-300 text-sm sm:text-base ${
+          className={`flex items-center justify-center space-x-1 sm:space-x-2 px-6 py-4 sm:px-6 sm:py-3 rounded-xl font-semibold transition-all duration-300 text-lg sm:text-base ${
             mode === 'voice' 
               ? 'bg-white text-blue-700 shadow-lg' 
               : 'text-gray-600 hover:text-gray-800'
@@ -33,13 +33,13 @@ export default function ModeToggle({
         >
           <Mic className="hidden sm:block w-4 h-4" />
           <span className="hidden sm:inline">Voice</span>
-          <span className="sm:hidden">🎤</span>
+          <span className="sm:hidden text-2xl">🎤</span>
         </button>
         
         <button
           onClick={!disabled ? toggleMode : undefined}
           disabled={disabled}
-          className={`flex items-center space-x-1 sm:space-x-2 px-3 py-2 sm:px-6 sm:py-3 rounded-xl font-semibold transition-all duration-300 text-sm sm:text-base ${
+          className={`flex items-center justify-center space-x-1 sm:space-x-2 px-6 py-4 sm:px-6 sm:py-3 rounded-xl font-semibold transition-all duration-300 text-lg sm:text-base ${
             mode === 'text' 
               ? 'bg-white text-blue-700 shadow-lg' 
               : 'text-gray-600 hover:text-gray-800'
@@ -47,7 +47,7 @@ export default function ModeToggle({
         >
           <Type className="hidden sm:block w-4 h-4" />
           <span className="hidden sm:inline">Type</span>
-          <span className="sm:hidden">✏️</span>
+          <span className="sm:hidden text-2xl">✏️</span>
         </button>
       </div>
     </div>

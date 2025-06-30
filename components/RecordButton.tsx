@@ -101,7 +101,7 @@ export default function RecordButton({
         }`} style={isProcessing || isRecording ? { animation: 'pulse 2.5s ease-in-out infinite 0.5s' } : {}} />
         
         <Button
-          className={`relative w-20 h-20 sm:w-24 sm:h-24 rounded-full transition-all duration-300 transform select-none shadow-2xl ${
+          className={`relative w-28 h-28 sm:w-24 sm:h-24 rounded-full transition-all duration-300 transform select-none shadow-2xl ${
             isProcessing
               ? 'bg-gradient-to-r from-blue-500 to-purple-600 scale-110'
               : isRecording
@@ -113,11 +113,11 @@ export default function RecordButton({
         >
           <div className="flex items-center justify-center">
             {isProcessing ? (
-              <Loader2 className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-lg animate-spin" />
+              <Loader2 className="w-8 h-8 sm:w-6 sm:h-6 text-white drop-shadow-lg animate-spin" />
             ) : isRecording ? (
-              <Square className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-lg" />
+              <Square className="w-8 h-8 sm:w-6 sm:h-6 text-white drop-shadow-lg" />
             ) : (
-              <Mic className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-lg" />
+              <Mic className="w-8 h-8 sm:w-6 sm:h-6 text-white drop-shadow-lg" />
             )}
           </div>
           
@@ -133,12 +133,12 @@ export default function RecordButton({
       </div>
 
       <div className="text-center space-y-1">
-        <p className={`text-sm sm:text-base font-semibold transition-colors duration-300 ${
+        <p className={`text-lg sm:text-base font-semibold transition-colors duration-300 ${
           isProcessing ? 'text-blue-600' : isRecording ? 'text-red-600' : 'text-gray-700'
         }`}>
           {isProcessing ? 'Translating...' : isRecording ? 'Recording...' : 'Ready to Record'}
         </p>
-        <p className="text-xs sm:text-sm text-gray-500">
+        <p className="text-sm sm:text-sm text-gray-500">
           {isProcessing ? 'Please wait while we process your audio' : isRecording ? 'Tap to stop and translate' : 'Tap the microphone to start'}
         </p>
       </div>

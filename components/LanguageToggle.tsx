@@ -25,13 +25,13 @@ export default function LanguageToggle({
         <button
           onClick={!disabled ? toggleDirection : undefined}
           disabled={disabled}
-          className={`flex items-center space-x-1 sm:space-x-2 px-3 py-2 sm:px-6 sm:py-3 rounded-xl font-semibold transition-all duration-300 text-sm sm:text-base ${
+          className={`flex items-center justify-center space-x-1 sm:space-x-2 px-6 py-4 sm:px-6 sm:py-3 rounded-xl font-semibold transition-all duration-300 text-lg sm:text-base ${
             !isViToEn 
               ? 'bg-white text-blue-700 shadow-lg' 
               : 'text-gray-600 hover:text-gray-800'
           } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-105'}`}
         >
-          <span className="text-base sm:text-xl">🇺🇸</span>
+          <span className="text-2xl sm:text-xl">🇺🇸</span>
           <span className="hidden sm:inline">English</span>
           <span className="sm:hidden">EN</span>
         </button>
@@ -39,13 +39,13 @@ export default function LanguageToggle({
         <button
           onClick={!disabled ? toggleDirection : undefined}
           disabled={disabled}
-          className={`flex items-center space-x-1 sm:space-x-2 px-3 py-2 sm:px-6 sm:py-3 rounded-xl font-semibold transition-all duration-300 text-sm sm:text-base ${
+          className={`flex items-center justify-center space-x-1 sm:space-x-2 px-6 py-4 sm:px-6 sm:py-3 rounded-xl font-semibold transition-all duration-300 text-lg sm:text-base ${
             isViToEn 
               ? 'bg-white text-blue-700 shadow-lg' 
               : 'text-gray-600 hover:text-gray-800'
           } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-105'}`}
         >
-          <span className="text-base sm:text-xl">🇻🇳</span>
+          <span className="text-2xl sm:text-xl">🇻🇳</span>
           <span className="hidden sm:inline">Vietnamese</span>
           <span className="sm:hidden">VI</span>
         </button>
