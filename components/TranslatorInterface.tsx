@@ -184,6 +184,7 @@ export default function TranslatorInterface() {
                 translatedText={result?.translatedText || ''}
                 error={error}
                 direction={direction}
+                onShowFullScreen={() => setShowFullScreen(true)}
               />
             </div>
           )}

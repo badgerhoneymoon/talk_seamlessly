@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Copy, Check, Volume2, Loader2 } from 'lucide-react';
+import { Copy, Check, Volume2, Loader2, Maximize2 } from 'lucide-react';
 import { TranslationDirection } from './TranslatorInterface';
 import { useSettings } from '@/contexts/SettingsContext';
 
@@ -12,13 +12,15 @@ interface TranslationOutputProps {
   translatedText: string;
   error?: string;
   direction: TranslationDirection;
+  onShowFullScreen?: () => void;
 }
 
 export default function TranslationOutput({ 
   originalText,
   translatedText, 
   error, 
-  direction 
+  direction,
+  onShowFullScreen
 }: TranslationOutputProps) {
   const [isCopiedTranslated, setIsCopiedTranslated] = useState(false);
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
@@ -209,6 +211,18 @@ export default function TranslationOutput({
                       <Copy className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
                     )}
                   </Button>
+
+                  {onShowFullScreen && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={onShowFullScreen}
+                      className="p-2 sm:p-3 hover:bg-white/60 rounded-xl transition-all duration-200 hover:scale-110 active:scale-95"
+                      title="Show in full screen"
+                    >
+                      <Maximize2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
+                    </Button>
+                  )}
                 </div>
               </div>
               
