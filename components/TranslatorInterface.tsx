@@ -7,6 +7,7 @@ import RecordButton from './RecordButton';
 import TranslationOutput from './TranslationOutput';
 import ModeToggle, { InputMode } from './ModeToggle';
 import TextInput from './TextInput';
+import SettingsButton from './SettingsButton';
 
 export type Language = 'vietnamese' | 'english';
 export type TranslationDirection = 'vi-to-en' | 'en-to-vi';
@@ -118,8 +119,11 @@ export default function TranslatorInterface() {
       <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-3xl blur-xl opacity-60 -z-10 transform scale-110"></div>
       
       <Card className="relative p-4 sm:p-8 space-y-6 sm:space-y-8 bg-white/90 backdrop-blur-xl border border-white/20 shadow-2xl rounded-3xl overflow-hidden">
-        {/* Subtle static background pattern */}
-        <div className="absolute inset-0 opacity-5">
+        {/* Settings Button */}
+        <SettingsButton />
+        
+        {/* Subtle static background pattern – allow clicks to pass through */}
+        <div className="absolute inset-0 opacity-5 pointer-events-none">
           <div className="absolute top-10 left-10 w-32 h-32 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full"></div>
           <div className="absolute bottom-10 right-10 w-24 h-24 bg-gradient-to-br from-indigo-400 to-pink-400 rounded-full"></div>
         </div>

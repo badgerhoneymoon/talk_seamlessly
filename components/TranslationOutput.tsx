@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Copy, Check, Volume2 } from 'lucide-react';
+import { Copy, Check, Volume2, Loader2 } from 'lucide-react';
 import { TranslationDirection } from './TranslatorInterface';
+import { useSettings } from '@/contexts/SettingsContext';
 
 interface TranslationOutputProps {
   originalText: string;
@@ -20,6 +21,10 @@ export default function TranslationOutput({
   direction 
 }: TranslationOutputProps) {
   const [isCopiedTranslated, setIsCopiedTranslated] = useState(false);
+  const [isLoadingAudio, setIsLoadingAudio] = useState(false);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [audioCache, setAudioCache] = useState<Record<string, string>>({});
+  const { settings } = useSettings();
 
   const copyToClipboard = async (text: string) => {
     if (!text) return;
@@ -33,33 +38,110 @@ export default function TranslationOutput({
     }
   };
 
-  const speakText = (text: string, isOriginal: boolean) => {
-    if (!text || !('speechSynthesis' in window)) return;
+  const speakText = async (text: string, isOriginal: boolean) => {
+    if (!text || isLoadingAudio || isPlayingAudio) return;
     
     // Stop any ongoing speech
     window.speechSynthesis.cancel();
     
-    const utterance = new SpeechSynthesisUtterance(text);
+    // Determine language
+    const language = isOriginal 
+      ? (direction === 'en-to-vi' ? 'en-US' : 'vi-VN')
+      : (direction === 'en-to-vi' ? 'vi-VN' : 'en-US');
     
-    // Set language based on whether it's original or translated
-    if (isOriginal) {
-      // Original text language
-      if (direction === 'en-to-vi') {
-        utterance.lang = 'en-US';
+    // Debug logging
+    console.log('🔊 TTS Debug Info:');
+    console.log('📝 Text to speak:', text);
+    console.log('🌍 Language:', language);
+    console.log('🎯 Is Original:', isOriginal);
+    console.log('↔️ Direction:', direction);
+    console.log('⚙️ TTS Provider:', settings.ttsProvider);
+    console.log('🎭 Current voice setting:', settings.openaiVoice);
+    console.log('📋 Full settings object:', settings);
+    
+    if (settings.ttsProvider === 'openai') {
+      const cacheKey = `${text}-${language}-${settings.openaiVoice}`;
+      
+      // Check if we have cached audio
+      if (audioCache[cacheKey]) {
+        console.log('💾 Using cached audio for:', text.substring(0, 50) + '...');
+        setIsPlayingAudio(true);
+        const audio = new Audio(audioCache[cacheKey]);
+        audio.play();
+        
+        audio.addEventListener('ended', () => {
+          setIsPlayingAudio(false);
+        });
+        
+        audio.addEventListener('error', () => {
+          setIsPlayingAudio(false);
+        });
       } else {
-        utterance.lang = 'vi-VN';
+        // Fetch new audio and cache it
+        setIsLoadingAudio(true);
+        console.log('🌐 Sending to OpenAI TTS API:', { text, language, voice: settings.openaiVoice });
+        
+        try {
+          const response = await fetch('/api/text-to-speech', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              text,
+              language,
+              voice: settings.openaiVoice,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error('TTS request failed');
+          }
+
+          const audioBlob = await response.blob();
+          const audioUrl = URL.createObjectURL(audioBlob);
+          
+          console.log('✅ OpenAI TTS response received, audio size:', audioBlob.size, 'bytes');
+          
+          // Cache the audio URL
+          setAudioCache(prev => ({ ...prev, [cacheKey]: audioUrl }));
+          
+          setIsLoadingAudio(false);
+          setIsPlayingAudio(true);
+          
+          const audio = new Audio(audioUrl);
+          audio.play();
+          
+          audio.addEventListener('ended', () => {
+            setIsPlayingAudio(false);
+          });
+          
+          audio.addEventListener('error', () => {
+            setIsPlayingAudio(false);
+          });
+          
+        } catch (error) {
+          console.error('❌ OpenAI TTS Error:', error);
+          setIsLoadingAudio(false);
+          // Fallback to browser TTS
+          playBrowserTTS(text, language);
+        }
       }
     } else {
-      // Translated text language
-      if (direction === 'en-to-vi') {
-        utterance.lang = 'vi-VN';
-      } else {
-        utterance.lang = 'en-US';
-      }
+      // Use browser TTS directly
+      playBrowserTTS(text, language);
     }
-    
+  };
+
+  const playBrowserTTS = (text: string, language: string) => {
+    setIsPlayingAudio(true);
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = language;
     utterance.rate = 0.9;
     utterance.pitch = 1;
+    
+    utterance.onend = () => setIsPlayingAudio(false);
+    utterance.onerror = () => setIsPlayingAudio(false);
     
     window.speechSynthesis.speak(utterance);
   };
@@ -102,10 +184,15 @@ export default function TranslationOutput({
                     variant="ghost"
                     size="sm"
                     onClick={() => speakText(translatedText, false)}
+                    disabled={isLoadingAudio || isPlayingAudio}
                     className="p-2 sm:p-3 hover:bg-white/60 rounded-xl transition-all duration-200 hover:scale-110 active:scale-95"
                     title="Listen to translation"
                   >
-                    <Volume2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
+                    {isLoadingAudio ? (
+                      <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 animate-spin" />
+                    ) : (
+                      <Volume2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
+                    )}
                   </Button>
                   
                   <Button
