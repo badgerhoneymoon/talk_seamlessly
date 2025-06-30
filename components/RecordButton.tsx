@@ -73,16 +73,6 @@ export default function RecordButton({
           return;
         }
 
-        // Create download link for debugging
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const link = document.createElement('a');
-        link.href = audioUrl;
-        link.download = `recording-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.${mimeType.includes('mp4') ? 'mp4' : mimeType.includes('webm') ? 'webm' : 'wav'}`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        console.log('💾 Audio file saved for debugging:', link.download);
         
         onStop(audioBlob);
         
