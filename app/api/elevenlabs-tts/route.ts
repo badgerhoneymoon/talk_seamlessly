@@ -83,25 +83,33 @@ export async function POST(request: NextRequest) {
       },
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('❌ ElevenLabs TTS Error:', error);
     
     // Handle specific ElevenLabs errors
     let errorMessage = 'Failed to generate Vietnamese speech';
     let statusCode = 500;
 
-    if (error.status === 429) {
-      errorMessage = 'Rate limit exceeded. Please try again later.';
-      statusCode = 429;
-    } else if (error.status === 401) {
-      errorMessage = 'Invalid ElevenLabs API key.';
-      statusCode = 401;
-    } else if (error.status === 400) {
-      errorMessage = 'Invalid request parameters.';
-      statusCode = 400;
-    } else if (error.message?.includes('insufficient credits')) {
-      errorMessage = 'Insufficient ElevenLabs credits. Please add more credits to your account.';
-      statusCode = 402;
+    if (error && typeof error === 'object' && 'status' in error) {
+      const status = (error as { status: number }).status;
+      if (status === 429) {
+        errorMessage = 'Rate limit exceeded. Please try again later.';
+        statusCode = 429;
+      } else if (status === 401) {
+        errorMessage = 'Invalid ElevenLabs API key.';
+        statusCode = 401;
+      } else if (status === 400) {
+        errorMessage = 'Invalid request parameters.';
+        statusCode = 400;
+      }
+    }
+    
+    if (error && typeof error === 'object' && 'message' in error) {
+      const message = (error as { message: string }).message;
+      if (message?.includes('insufficient credits')) {
+        errorMessage = 'Insufficient ElevenLabs credits. Please add more credits to your account.';
+        statusCode = 402;
+      }
     }
 
     return NextResponse.json(
