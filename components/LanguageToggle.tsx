@@ -54,6 +54,30 @@ export default function LanguageToggle({
     onDirectionChange(newDirection);
   };
 
+  const switchLanguagePair = (clickedLanguageIndex: number) => {
+    const clickedLanguage = pair.languages[clickedLanguageIndex];
+    
+    // If clicking on the currently active language
+    if ((isFirstDirection && clickedLanguageIndex === 0) || (!isFirstDirection && clickedLanguageIndex === 1)) {
+      // Only switch language pairs if the clicked language is NOT Vietnamese
+      if (clickedLanguage.short !== 'VI') {
+        const newPair: LanguagePair = currentPair === 'en-vi' ? 'ru-vi' : 'en-vi';
+        
+        // Maintain the same direction pattern when switching pairs
+        const isToVietnamese = direction.endsWith('-to-vi');
+        const newDirection = isToVietnamese 
+          ? LANGUAGE_PAIRS[newPair].directions[0]  // X-to-vi
+          : LANGUAGE_PAIRS[newPair].directions[1]; // vi-to-X
+        
+        onDirectionChange(newDirection);
+      }
+      // If clicking on Vietnamese twice, do nothing (no pair switch)
+    } else {
+      // Otherwise, just toggle direction
+      toggleDirection();
+    }
+  };
+
   const pair = LANGUAGE_PAIRS[currentPair];
   const currentLangIndex = pair.directions.indexOf(direction);
   const isFirstDirection = currentLangIndex === 0;
@@ -61,7 +85,7 @@ export default function LanguageToggle({
   return (
     <div className="relative flex items-center bg-gray-100/80 backdrop-blur-sm rounded-2xl p-1 shadow-inner">
       <button
-        onClick={!disabled ? toggleDirection : undefined}
+        onClick={!disabled ? () => switchLanguagePair(0) : undefined}
         disabled={disabled}
         className={`flex items-center justify-center space-x-1 sm:space-x-2 px-6 py-4 sm:px-6 sm:py-3 rounded-xl font-semibold transition-all duration-300 text-lg sm:text-base ${
           isFirstDirection
@@ -75,7 +99,7 @@ export default function LanguageToggle({
       </button>
       
       <button
-        onClick={!disabled ? toggleDirection : undefined}
+        onClick={!disabled ? () => switchLanguagePair(1) : undefined}
         disabled={disabled}
         className={`flex items-center justify-center space-x-1 sm:space-x-2 px-6 py-4 sm:px-6 sm:py-3 rounded-xl font-semibold transition-all duration-300 text-lg sm:text-base ${
           !isFirstDirection
