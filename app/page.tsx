@@ -12,7 +12,7 @@ export default function Home() {
         <div className="absolute bottom-1/4 left-1/3 w-80 h-80 bg-gradient-to-r from-indigo-200 to-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30"></div>
       </div>
       
-      <div className="relative z-10 min-h-screen flex items-center justify-center px-4 py-6 sm:p-6">
+      <div className="relative z-10 min-h-screen flex items-start sm:items-center justify-center px-4 pt-4 pb-3 sm:p-6">
         <div className="w-full max-w-sm sm:max-w-lg">
           <TranslatorInterface />
         </div>

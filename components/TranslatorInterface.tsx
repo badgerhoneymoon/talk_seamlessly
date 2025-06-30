@@ -126,12 +126,12 @@ export default function TranslatorInterface() {
 
         <div className="relative z-10 space-y-6 sm:space-y-8">
           {/* Header section with enhanced typography */}
-          <div className="text-center space-y-1 sm:space-y-2">
-            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+          <div className="text-center space-y-0.5 sm:space-y-2">
+            <h1 className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
               Talk Seamlessly
             </h1>
             <p className="text-xs sm:text-sm text-gray-500 font-medium">
-              Instant Vietnamese ↔ English Translation
+              Vietnamese ↔ English Translation
             </p>
           </div>
 
