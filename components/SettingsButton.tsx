@@ -20,6 +20,10 @@ export default function SettingsButton() {
     console.log('✅ Voice updated, new settings:', { ...settings, openaiVoice: voice });
   };
 
+  const handleSpeedChange = (speed: number) => {
+    updateSetting('ttsSpeed', speed);
+  };
+
   const voiceOptions: { value: OpenAIVoice; label: string; description: string }[] = [
     { value: 'alloy', label: 'Alloy', description: 'Neutral, balanced' },
     { value: 'echo', label: 'Echo', description: 'Deep, resonant' },
@@ -115,6 +119,42 @@ export default function SettingsButton() {
                 </div>
               </div>
             )}
+          </div>
+
+          <div className="pt-4">
+            <h4 className="text-base sm:text-sm font-medium bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">Speech Speed</h4>
+            <div className="space-y-3">
+              <div className="px-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-600">Speed: {settings.ttsSpeed}x</span>
+                  <div className="flex space-x-1 text-xs text-gray-400">
+                    <span>Slow</span>
+                    <span>•</span>
+                    <span>Fast</span>
+                  </div>
+                </div>
+                <input
+                  type="range"
+                  min="0.5"
+                  max="1.0"
+                  step="0.1"
+                  value={settings.ttsSpeed}
+                  onChange={(e) => handleSpeedChange(parseFloat(e.target.value))}
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                  style={{
+                    background: `linear-gradient(to right, rgb(168 85 247) 0%, rgb(168 85 247) ${((settings.ttsSpeed - 0.5) / 0.5) * 100}%, rgb(229 231 235) ${((settings.ttsSpeed - 0.5) / 0.5) * 100}%, rgb(229 231 235) 100%)`
+                  }}
+                />
+                <div className="flex justify-between text-xs text-gray-400 mt-1">
+                  <span>0.5x</span>
+                  <span>0.6x</span>
+                  <span>0.7x</span>
+                  <span>0.8x</span>
+                  <span>0.9x</span>
+                  <span>1.0x</span>
+                </div>
+              </div>
+            </div>
           </div>
         </Card>
       </div>

@@ -60,7 +60,7 @@ export default function TranslationOutput({
     console.log('📋 Full settings object:', settings);
     
     if (settings.ttsProvider === 'openai') {
-      const cacheKey = `${text}-${language}-${settings.openaiVoice}`;
+      const cacheKey = `${text}-${language}-${settings.openaiVoice}-${settings.ttsSpeed}`;
       
       // Check if we have cached audio
       if (audioCache[cacheKey]) {
@@ -79,7 +79,7 @@ export default function TranslationOutput({
       } else {
         // Fetch new audio and cache it
         setIsLoadingAudio(true);
-        console.log('🌐 Sending to OpenAI TTS API:', { text, language, voice: settings.openaiVoice });
+        console.log('🌐 Sending to OpenAI TTS API:', { text, language, voice: settings.openaiVoice, speed: settings.ttsSpeed });
         
         try {
           const response = await fetch('/api/text-to-speech', {
@@ -91,6 +91,7 @@ export default function TranslationOutput({
               text,
               language,
               voice: settings.openaiVoice,
+              speed: settings.ttsSpeed,
             }),
           });
 
@@ -137,7 +138,7 @@ export default function TranslationOutput({
     setIsPlayingAudio(true);
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = language;
-    utterance.rate = 0.9;
+    utterance.rate = settings.ttsSpeed;
     utterance.pitch = 1;
     
     utterance.onend = () => setIsPlayingAudio(false);

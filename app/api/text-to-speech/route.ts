@@ -7,12 +7,13 @@ const openai = new OpenAI({
 
 export async function POST(request: NextRequest) {
   try {
-    const { text, language, voice } = await request.json();
+    const { text, language, voice, speed } = await request.json();
     
     console.log('🎯 TTS API received request:');
     console.log('📝 Text:', text);
     console.log('🌍 Language:', language);
     console.log('🎭 Voice:', voice);
+    console.log('⚡ Speed:', speed);
     console.log('📏 Text length:', text?.length || 0);
     
     if (!text) {
@@ -32,7 +33,7 @@ export async function POST(request: NextRequest) {
       voice: selectedVoice as 'alloy' | 'echo' | 'fable' | 'onyx' | 'nova' | 'shimmer',
       input: text,
       response_format: 'mp3' as const,
-      speed: 1.0,
+      speed: speed || 1.0,
     };
     
     console.log('🔧 OpenAI TTS params:', ttsParams);

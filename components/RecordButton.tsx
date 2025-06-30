@@ -113,11 +113,11 @@ export default function RecordButton({
         >
           <div className="flex items-center justify-center">
             {isProcessing ? (
-              <Loader2 className="w-8 h-8 sm:w-6 sm:h-6 text-white drop-shadow-lg animate-spin" />
+              <Loader2 className="w-10 h-10 sm:w-8 sm:h-8 text-white drop-shadow-lg animate-spin" />
             ) : isRecording ? (
-              <Square className="w-8 h-8 sm:w-6 sm:h-6 text-white drop-shadow-lg" />
+              <Square className="w-10 h-10 sm:w-8 sm:h-8 text-white drop-shadow-lg" />
             ) : (
-              <Mic className="w-8 h-8 sm:w-6 sm:h-6 text-white drop-shadow-lg" />
+              <Mic className="w-10 h-10 sm:w-8 sm:h-8 text-white drop-shadow-lg" />
             )}
           </div>
           
